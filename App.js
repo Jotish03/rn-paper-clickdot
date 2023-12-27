@@ -15,6 +15,7 @@ import Main from "./Main";
 import { colors } from "./colors";
 import UserLogin from "./components/UserLogin";
 import UserRegister from "./components/UserRegister";
+import HomeScreen from "./components/MainScreen/HomeScreen";
 
 const theme = {
   ...DefaultTheme,
@@ -46,6 +47,11 @@ export default function App() {
             name="Register"
             options={{ headerShown: false }}
             component={UserRegister}
+          />
+          <Stack.Screen
+            name="HomeScreen"
+            options={{ headerShown: false }}
+            component={HomeScreen}
           />
           <Stack.Screen
             name="Contacts"

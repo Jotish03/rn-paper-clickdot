@@ -50,7 +50,12 @@ const UserLogin = ({ navigation }) => {
       <Button style={styles.loginBtn} mode="contained" onPress={handleLogin}>
         Login
       </Button>
-      <Button style={styles.loginGoogle} icon="google" mode="outlined">
+      <Button
+        style={styles.loginGoogle}
+        icon="google"
+        mode="outlined"
+        onPress={() => navigation.navigate("HomeScreen")}
+      >
         Login with Google
       </Button>
       <View style={styles.signupTextContainer}>
