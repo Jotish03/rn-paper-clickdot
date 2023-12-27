@@ -3,9 +3,12 @@ import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import { colors } from "../colors";
 import LottieView from "lottie-react-native";
-const UserLogin = ({ navigation }) => {
+
+const UserRegister = ({ navigation }) => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
@@ -25,9 +28,15 @@ const UserLogin = ({ navigation }) => {
       </View>
       <View style={styles.subTextContainer}>
         <Text style={styles.subText}>
-          Your Gateway to a World of Wonders: Securely Login with a Click
+          Embark on Your Digital Journey: Effortless Registration
         </Text>
       </View>
+      <TextInput
+        label="Name"
+        value={name}
+        onChangeText={(text) => setName(text)}
+        style={styles.textInput}
+      />
       <TextInput
         label="Email"
         value={email}
@@ -47,21 +56,34 @@ const UserLogin = ({ navigation }) => {
         }
         style={styles.textInput}
       />
+      <TextInput
+        label="Confirm Password"
+        value={confirmPassword}
+        onChangeText={(text) => setConfirmPassword(text)}
+        secureTextEntry={!showPassword} // Use secureTextEntry for the password input
+        right={
+          <TextInput.Icon
+            icon={showPassword ? "eye-off" : "eye"}
+            onPress={() => setShowPassword(!showPassword)}
+          />
+        }
+        style={styles.textInput}
+      />
       <Button style={styles.loginBtn} mode="contained" onPress={handleLogin}>
-        Login
+        Register
       </Button>
-      <Button style={styles.loginGoogle} icon="google" mode="outlined">
-        Login with Google
-      </Button>
+
       <View style={styles.signupTextContainer}>
-        <Text style={styles.signUpText}>Not Registered? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text style={styles.linkRegister}>Register Now</Text>
+        <Text style={styles.signUpText}>Already Registered? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+          <Text style={styles.linkRegister}>Login Now</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
+
+export default UserRegister;
 
 const styles = StyleSheet.create({
   container: {
@@ -125,5 +147,3 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
 });
-
-export default UserLogin;

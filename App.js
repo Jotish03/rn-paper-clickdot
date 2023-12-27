@@ -1,7 +1,10 @@
 import * as React from "react";
 import { AppRegistry } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  CardStyleInterpolators,
+  createStackNavigator,
+} from "@react-navigation/stack";
 
 import {
   MD3DarkTheme as DefaultTheme,
@@ -11,6 +14,7 @@ import { name as appName } from "./app.json";
 import Main from "./Main";
 import { colors } from "./colors";
 import UserLogin from "./components/UserLogin";
+import UserRegister from "./components/UserRegister";
 
 const theme = {
   ...DefaultTheme,
@@ -22,19 +26,27 @@ const theme = {
   },
 };
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
       <PaperProvider theme={theme}>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        >
           <Stack.Screen
             name="Home"
             options={{ headerShown: false }}
             component={UserLogin}
           />
-
+          <Stack.Screen
+            name="Register"
+            options={{ headerShown: false }}
+            component={UserRegister}
+          />
           <Stack.Screen
             name="Contacts"
             options={{ headerShown: false }}
