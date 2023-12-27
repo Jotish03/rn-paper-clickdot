@@ -15,9 +15,9 @@ import HomeRoute from "./Routes/HomeRoute";
 const MORE_ICON = Platform.OS === "ios" ? "dots-horizontal" : "dots-vertical";
 //navigation bottom
 
-const AlbumsRoute = () => <Text>Albums</Text>;
+const LearnRoute = () => <Text>Learn</Text>;
 
-const RecentsRoute = () => <Text>Recents</Text>;
+const SettingRoute = () => <Text>Setting</Text>;
 
 const NotificationsRoute = () => <Text>Notifications</Text>;
 
@@ -29,26 +29,26 @@ const HomeScreen = () => {
 
   const [routes] = useState([
     {
-      key: "music",
+      key: "fav",
       title: "Favorites",
       focusedIcon: "heart",
       unfocusedIcon: "heart-outline",
     },
-    { key: "albums", title: "Albums", focusedIcon: "album" },
-    { key: "recents", title: "Recents", focusedIcon: "history" },
+    { key: "learn", title: "Learn", focusedIcon: "book-open-page-variant" },
     {
       key: "notifications",
       title: "Notifications",
       focusedIcon: "bell",
       unfocusedIcon: "bell-outline",
     },
+    { key: "setting", title: "Setting", focusedIcon: "cog" },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
-    music: HomeRoute,
-    albums: AlbumsRoute,
-    recents: RecentsRoute,
+    fav: HomeRoute,
+    learn: LearnRoute,
     notifications: NotificationsRoute,
+    setting: SettingRoute,
   });
   return (
     <>
