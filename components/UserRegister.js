@@ -1,18 +1,27 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
-import { TextInput, Button } from "react-native-paper";
+import { TextInput, Button, Snackbar } from "react-native-paper";
 import { colors } from "../colors";
 import LottieView from "lottie-react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebase";
 
 const UserRegister = ({ navigation }) => {
+  const [visible, setVisible] = React.useState(false);
+  const onDismissSnackBar = () => setVisible(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    // Add your login logic here
+  const handleLogin = async () => {
+    if (name && email && password && confirmPassword === password) {
+      await createUserWithEmailAndPassword(auth, email, password);
+      navigation.navigate("HomeScreen");
+    } else {
+      setVisible(true);
+    }
   };
 
   return (
@@ -79,6 +88,17 @@ const UserRegister = ({ navigation }) => {
           <Text style={styles.linkRegister}>Login Now</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.snackbar}>
+        <Snackbar
+          visible={visible}
+          onDismiss={onDismissSnackBar}
+          action={{
+            label: "Close",
+          }}
+        >
+          <Text>Email or Password is Invalid</Text>
+        </Snackbar>
+      </View>
     </View>
   );
 };
@@ -103,6 +123,13 @@ const styles = StyleSheet.create({
   logo: {
     width: 30,
     height: 30,
+  },
+  snackbar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.error,
   },
   logoText: {
     marginLeft: -10, // Add spacing between logo and text

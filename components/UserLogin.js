@@ -1,15 +1,74 @@
-import React, { useRef, useState } from "react";
-import { StyleSheet, View, Image, Text, TouchableOpacity } from "react-native";
-import { TextInput, Button } from "react-native-paper";
-import { colors } from "../colors";
+import React, { useState } from "react";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { TextInput, Button, Snackbar } from "react-native-paper";
 import LottieView from "lottie-react-native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebase";
+import { useDispatch, useSelector } from "react-redux";
+import Loader from "./ActivityIndicator/Loader";
+import { setUserLoading } from "../redux/slices/userSlice";
+import { colors } from "../colors";
+
 const UserLogin = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Add this line
+  const { userLoading } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
-  const handleLogin = () => {
-    // Add your login logic here
+  const onDismissSnackBar = () => {
+    setVisible(false);
+    setSnackbarMessage("");
+  };
+
+  const handleLogin = async () => {
+    try {
+      if (email && password && isValidEmail(email)) {
+        dispatch(setUserLoading(true));
+        await signInWithEmailAndPassword(auth, email, password);
+        dispatch(setUserLoading(false));
+        navigation.navigate("HomeScreen");
+      } else {
+        setSnackbarMessage("Please enter a valid email and password");
+        setVisible(true);
+      }
+    } catch (error) {
+      dispatch(setUserLoading(false));
+      console.error(error);
+
+      let errorMessage = "An error occurred. Please try again.";
+
+      // Customize error messages based on Firebase error codes
+      switch (error.code) {
+        case "auth/user-not-found":
+          errorMessage = "User not found. Please check your email.";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Invalid password. Please try again.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Invalid email address. Please enter a valid email.";
+          break;
+        case "auth/invalid-credential":
+          errorMessage =
+            "Invalid credentials. Please check your email and password.";
+          break;
+        default:
+          break;
+      }
+
+      setSnackbarMessage(errorMessage);
+      setVisible(true);
+    }
+  };
+
+  const isValidEmail = (email) => {
+    // Implement your email validation logic here
+    // For a basic validation, you can use a regular expression
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   return (
@@ -38,7 +97,7 @@ const UserLogin = ({ navigation }) => {
         label="Password"
         value={password}
         onChangeText={(text) => setPassword(text)}
-        secureTextEntry={!showPassword} // Use secureTextEntry for the password input
+        secureTextEntry={!showPassword}
         right={
           <TextInput.Icon
             icon={showPassword ? "eye-off" : "eye"}
@@ -47,9 +106,19 @@ const UserLogin = ({ navigation }) => {
         }
         style={styles.textInput}
       />
-      <Button style={styles.loginBtn} mode="contained" onPress={handleLogin}>
-        Login
-      </Button>
+      {userLoading ? (
+        <Loader size={"small"} />
+      ) : (
+        <Button
+          style={styles.loginBtn}
+          mode="contained"
+          onPress={handleLogin}
+          disabled={userLoading}
+        >
+          {userLoading ? <Loader size="small" /> : "Login"}
+        </Button>
+      )}
+
       <Button
         style={styles.loginGoogle}
         icon="google"
@@ -64,6 +133,17 @@ const UserLogin = ({ navigation }) => {
           <Text style={styles.linkRegister}>Register Now</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.snackbar}>
+        <Snackbar
+          visible={visible}
+          onDismiss={onDismissSnackBar}
+          action={{
+            label: "Close",
+          }}
+        >
+          <Text style={styles.snackbarText}>{snackbarMessage}</Text>
+        </Snackbar>
+      </View>
     </View>
   );
 };
@@ -73,30 +153,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 30, // Add padding for better spacing
+    padding: 30,
     backgroundColor: colors.background,
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40, // Add margin for separation
+    marginBottom: 40,
     marginLeft: -35,
   },
-  logo: {
-    width: 30,
-    height: 30,
-  },
   logoText: {
-    marginLeft: -10, // Add spacing between logo and text
+    marginLeft: -10,
     fontSize: 24,
     color: "white",
     fontWeight: "bold",
-    // Set the text color to 'white'
   },
   textInput: {
-    width: "100%", // Use 100% width for TextInput
-    marginBottom: 12, // Add margin for separation
+    width: "100%",
+    marginBottom: 12,
   },
   loginBtn: {
     width: "100%",
@@ -110,14 +185,14 @@ const styles = StyleSheet.create({
   subTextContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 10, // Added margin for separation
+    marginVertical: 10,
     marginTop: -60,
   },
   subText: {
-    textAlign: "center", // Center the text
-    fontSize: 16, // Adjusted font size
+    textAlign: "center",
+    fontSize: 16,
     color: "white",
-    padding: 20, // Added padding for better visual appeal
+    padding: 20,
   },
   signupTextContainer: {
     marginTop: 20,
@@ -128,6 +203,16 @@ const styles = StyleSheet.create({
   },
   linkRegister: {
     color: colors.primary,
+  },
+  snackbar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.error,
+  },
+  snackbarText: {
+    color: colors.background,
   },
 });
 

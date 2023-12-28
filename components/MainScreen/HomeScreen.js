@@ -11,6 +11,8 @@ import {
 } from "react-native-paper";
 import { colors } from "../../colors";
 import HomeRoute from "./Routes/HomeRoute";
+import { signOut } from "firebase/auth";
+import { auth } from "../../config/firebase";
 
 const MORE_ICON = Platform.OS === "ios" ? "dots-horizontal" : "dots-vertical";
 //navigation bottom
@@ -50,6 +52,9 @@ const HomeScreen = () => {
     notifications: NotificationsRoute,
     setting: SettingRoute,
   });
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
   return (
     <>
       <Appbar.Header>
@@ -68,7 +73,11 @@ const HomeScreen = () => {
             title="Edit"
           />
           <Divider />
-          <Menu.Item leadingIcon="logout" onPress={() => {}} title="Logout" />
+          <Menu.Item
+            leadingIcon="logout"
+            onPress={handleLogout}
+            title="Logout"
+          />
         </Menu>
       </Appbar.Header>
 
