@@ -36,31 +36,8 @@ const UserLogin = ({ navigation }) => {
       }
     } catch (error) {
       dispatch(setUserLoading(false));
-      console.error(error);
-
-      let errorMessage = "An error occurred. Please try again.";
-
-      // Customize error messages based on Firebase error codes
-      switch (error.code) {
-        case "auth/user-not-found":
-          errorMessage = "User not found. Please check your email.";
-          break;
-        case "auth/wrong-password":
-          errorMessage = "Invalid password. Please try again.";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "Invalid email address. Please enter a valid email.";
-          break;
-        case "auth/invalid-credential":
-          errorMessage =
-            "Invalid credentials. Please check your email and password.";
-          break;
-        default:
-          break;
-      }
-
-      setSnackbarMessage(errorMessage);
       setVisible(true);
+      setSnackbarMessage("An error occurred. Please try again later.");
     }
   };
 
@@ -123,7 +100,7 @@ const UserLogin = ({ navigation }) => {
         style={styles.loginGoogle}
         icon="google"
         mode="outlined"
-        onPress={() => navigation.navigate("HomeScreen")}
+        onPress={handleLogin}
       >
         Login with Google
       </Button>

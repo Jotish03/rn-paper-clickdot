@@ -8,6 +8,7 @@ import { auth } from "../config/firebase";
 
 const UserRegister = ({ navigation }) => {
   const [visible, setVisible] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
   const onDismissSnackBar = () => setVisible(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -16,11 +17,18 @@ const UserRegister = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (name && email && password && confirmPassword === password) {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigation.navigate("HomeScreen");
-    } else {
+    try {
+      if (name && email && password && confirmPassword === password) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        navigation.navigate("HomeScreen");
+      } else {
+        setVisible(true);
+        setErrorMessage("Invalid input. Please check your entries.");
+      }
+    } catch (error) {
+      // Set a generic error message for any Firebase error
       setVisible(true);
+      setErrorMessage("An error occurred. Please try again later.");
     }
   };
 
@@ -96,7 +104,7 @@ const UserRegister = ({ navigation }) => {
             label: "Close",
           }}
         >
-          <Text>Email or Password is Invalid</Text>
+          <Text>{errorMessage}</Text>
         </Snackbar>
       </View>
     </View>
