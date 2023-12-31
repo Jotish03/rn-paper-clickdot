@@ -14,7 +14,9 @@ const UserLogin = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // Add this line
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [name, setName] = useState("");
+
   const { userLoading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -27,9 +29,18 @@ const UserLogin = ({ navigation }) => {
     try {
       if (email && password && isValidEmail(email)) {
         dispatch(setUserLoading(true));
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredential.user;
+
+        // Check if displayName is available, use it; otherwise, use an empty string
+        const displayName = user.displayName || "";
+
         dispatch(setUserLoading(false));
-        navigation.navigate("HomeScreen");
+        navigation.navigate("HomeScreen", { username: displayName });
       } else {
         setSnackbarMessage("Please enter a valid email and password");
         setVisible(true);
@@ -42,8 +53,6 @@ const UserLogin = ({ navigation }) => {
   };
 
   const isValidEmail = (email) => {
-    // Implement your email validation logic here
-    // For a basic validation, you can use a regular expression
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };

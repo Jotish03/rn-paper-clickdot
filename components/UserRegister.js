@@ -5,6 +5,7 @@ import { colors } from "../colors";
 import LottieView from "lottie-react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
+import { updateProfile } from "firebase/auth";
 
 const UserRegister = ({ navigation }) => {
   const [visible, setVisible] = React.useState(false);
@@ -16,17 +17,25 @@ const UserRegister = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
+  const handleRegistration = async () => {
     try {
       if (name && email && password && confirmPassword === password) {
-        await createUserWithEmailAndPassword(auth, email, password);
-        navigation.navigate("HomeScreen");
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredential.user;
+
+        // Set the user's name in the displayName field
+        await updateProfile(user, { displayName: name });
+
+        navigation.navigate("HomeScreen", { username: name });
       } else {
         setVisible(true);
         setErrorMessage("Invalid input. Please check your entries.");
       }
     } catch (error) {
-      // Set a generic error message for any Firebase error
       setVisible(true);
       setErrorMessage("An error occurred. Please try again later.");
     }
@@ -86,7 +95,11 @@ const UserRegister = ({ navigation }) => {
         }
         style={styles.textInput}
       />
-      <Button style={styles.loginBtn} mode="contained" onPress={handleLogin}>
+      <Button
+        style={styles.loginBtn}
+        mode="contained"
+        onPress={handleRegistration}
+      >
         Register
       </Button>
 

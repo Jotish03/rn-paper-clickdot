@@ -9,16 +9,20 @@ import {
   IconButton,
   Searchbar,
 } from "react-native-paper";
+import { useRoute } from "@react-navigation/native";
 
 const HomeRoute = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const onChangeSearch = () => {};
+  const route = useRoute();
+  const { params } = route;
+  const { username } = params;
   return (
     <View style={styles.container}>
       <Card.Title
         titleStyle={{ fontSize: 20, fontWeight: "bold" }}
         subtitleStyle={{ fontSize: 12 }}
-        title="Welcome Jotish "
+        title={`Welcome ${username}`}
         subtitle="Your Profile"
         left={(props) => (
           <LottieView
