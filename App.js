@@ -3,6 +3,7 @@ import { AppRegistry } from "react-native";
 import { name as appName } from "./app.json";
 import { store } from "./redux/store";
 import AppNavigate from "./navigation/AppNavigate";
+import "react-native-gesture-handler";
 import { Provider } from "react-redux";
 import {
   MD3DarkTheme as DefaultTheme,

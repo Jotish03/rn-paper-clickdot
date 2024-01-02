@@ -1,24 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { TextInput, Button, Snackbar } from "react-native-paper";
 import LottieView from "lottie-react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth as rnauth } from "../config/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "./ActivityIndicator/Loader";
-import { setUserLoading } from "../redux/slices/userSlice";
+import { setUserLoading, setUser } from "../redux/slices/userSlice";
 import { colors } from "../colors";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import auth from "@react-native-firebase/auth";
+import { useNavigation } from "@react-navigation/native";
 
-const UserLogin = ({ navigation }) => {
+const UserLogin = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [visible, setVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [name, setName] = useState("");
+  // Set an initializing state whilst Firebase connects
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState();
 
   const { userLoading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+
+  GoogleSignin.configure({
+    webClientId:
+      "490604024450-flf9dd2d2iapoee05vee45n74ojjpk5r.apps.googleusercontent.com",
+  });
+
+  // Handle user state changes
+  function onAuthStateChanged(user) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  const onGoogleButtonPress = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+
+      const { idToken } = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      const userCredential = await auth().signInWithCredential(
+        googleCredential
+      );
+      const user = userCredential.user;
+
+      // Check if displayName is defined before using it
+      const username = user?.displayName || "DefaultUsername";
+
+      navigation.navigate("HomeScreen", { username });
+      console.log("Google Sign-In Successful");
+
+      // Wait for the authentication process to complete before navigating
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      if (error.code === "SIGN_IN_CANCELLED") {
+        // Handle cancellation if needed
+      }
+    }
+  };
+
+  if (initializing) return null;
 
   const onDismissSnackBar = () => {
     setVisible(false);
@@ -30,7 +84,7 @@ const UserLogin = ({ navigation }) => {
       if (email && password && isValidEmail(email)) {
         dispatch(setUserLoading(true));
         const userCredential = await signInWithEmailAndPassword(
-          auth,
+          rnauth,
           email,
           password
         );
@@ -109,10 +163,11 @@ const UserLogin = ({ navigation }) => {
         style={styles.loginGoogle}
         icon="google"
         mode="outlined"
-        onPress={handleLogin}
+        onPress={onGoogleButtonPress}
       >
         Login with Google
       </Button>
+
       <View style={styles.signupTextContainer}>
         <Text style={styles.signUpText}>Not Registered? </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Register")}>

@@ -24,56 +24,33 @@ const AppNavigate = () => {
     console.log("user details ", u);
     dispatch(setUser(u));
   });
-  if (user) {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="HomeScreen"
-          screenOptions={{
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        >
-          <Stack.Screen
-            name="Home"
-            options={{ headerShown: false }}
-            component={UserLogin}
-          />
-          <Stack.Screen
-            name="Register"
-            options={{ headerShown: false }}
-            component={UserRegister}
-          />
-          <Stack.Screen
-            name="HomeScreen"
-            options={{ headerShown: false }}
-            component={HomeScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  } else {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="UserLogin"
-          screenOptions={{
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        >
-          <Stack.Screen
-            name="Home"
-            options={{ headerShown: false }}
-            component={UserLogin}
-          />
-          <Stack.Screen
-            name="Register"
-            options={{ headerShown: false }}
-            component={UserRegister}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={user ? "HomeScreen" : "UserLogin"} // Use dynamic initial route based on user authentication status
+        screenOptions={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      >
+        <Stack.Screen
+          name="Home"
+          options={{ headerShown: false }}
+          component={UserLogin}
+        />
+        <Stack.Screen
+          name="Register"
+          options={{ headerShown: false }}
+          component={UserRegister}
+        />
+        <Stack.Screen
+          name="HomeScreen"
+          options={{ headerShown: false }}
+          component={HomeScreen}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };
 
 export default AppNavigate;

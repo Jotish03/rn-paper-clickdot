@@ -1,5 +1,5 @@
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { SafeAreaView, StyleSheet, Text, View, Platform } from "react-native";
 import {
   Appbar,
   Avatar,
@@ -12,24 +12,25 @@ import {
 import { colors } from "../../colors";
 import HomeRoute from "./Routes/HomeRoute";
 import { signOut } from "firebase/auth";
-import { auth } from "../../config/firebase";
+import { auth as rnauth } from "../../config/firebase";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import auth from "@react-native-firebase/auth";
 
 const MORE_ICON = Platform.OS === "ios" ? "dots-horizontal" : "dots-vertical";
-//navigation bottom
 
 const LearnRoute = () => <Text>Learn</Text>;
-
 const SettingRoute = () => <Text>Setting</Text>;
-
 const NotificationsRoute = () => <Text>Notifications</Text>;
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [visible, setVisible] = useState(false);
-  const [index, setIndex] = React.useState(0);
+  const [index, setIndex] = useState(0);
+  const [userProfilePicture, setUserProfilePicture] = useState(null);
+
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const [routes] = useState([
+  const routes = [
     {
       key: "fav",
       title: "Favorites",
@@ -44,7 +45,7 @@ const HomeScreen = () => {
       unfocusedIcon: "bell-outline",
     },
     { key: "setting", title: "Setting", focusedIcon: "cog" },
-  ]);
+  ];
 
   const renderScene = BottomNavigation.SceneMap({
     fav: HomeRoute,
@@ -52,15 +53,57 @@ const HomeScreen = () => {
     notifications: NotificationsRoute,
     setting: SettingRoute,
   });
+  useEffect(() => {
+    const fetchUserProfilePicture = async () => {
+      try {
+        const userGoogle = auth().currentUser;
+
+        if (userGoogle) {
+          const userInfo = await GoogleSignin.signInSilently();
+          setUserProfilePicture(userInfo?.user?.photo);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile picture:", error);
+      }
+    };
+
+    fetchUserProfilePicture();
+  }, []);
   const handleLogout = async () => {
-    await signOut(auth);
+    try {
+      const user = rnauth.currentUser;
+      const userGoogle = auth().currentUser;
+
+      if (user) {
+        if (user.providerData[0].providerId === "password") {
+          await signOut(rnauth);
+        } else {
+          // Handle other providers if needed
+        }
+      }
+
+      if (userGoogle) {
+        await GoogleSignin.revokeAccess();
+        await GoogleSignin.signOut();
+        await auth().signOut();
+      }
+
+      navigation.navigate("Home");
+      console.log("Sign Out Successful");
+    } catch (error) {
+      console.error("Sign Out Error:", error);
+    }
   };
+
   return (
     <>
       <Appbar.Header>
         <Appbar.Content title="#clickdot" titleStyle={styles.headerTitle} />
-        <Avatar.Icon size={24} icon="account" />
-
+        {userProfilePicture ? (
+          <Avatar.Image size={24} source={{ uri: userProfilePicture }} />
+        ) : (
+          <Avatar.Icon size={24} icon="account" />
+        )}
         <Menu
           visible={visible}
           onDismiss={closeMenu}
@@ -93,11 +136,6 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: colors.background,
-  },
   headerTitle: {
     fontWeight: "bold",
   },
